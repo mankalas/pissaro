@@ -20,21 +20,31 @@ require "pissaro"
 # -t tidy (duplicate, similar, non-multimedia, inconsistent dates, )
 
 require "pissaro/persistence"
-
+require "pissaro/snapshot"
 
 def database_command
   case ARGV[1]
   when "drop"
-    Persistence.new.close
+    Persistence.new.delete
   when "columns"
     puts Persistence.new.media_columns
   when "records"
     puts Persistence.new.record_count
+  when "set"
+    Persistence.new.set
   end
 end
 
 def snapshot_command
-
+  puts "SNAPSHOT"
+  puts ARGV[1]
+  case ARGV[1]
+  when "all"
+  when "exif"
+  when "md5"
+    Snapshot.new.md5 ARGV[2]
+  when "compare"
+  end
 end
 
 case ARGV[0]
