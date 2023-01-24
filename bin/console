@@ -10,5 +10,48 @@ require "pissaro"
 # require "pry"
 # Pry.start
 
+# -d database (drop, reset, stats...)
+#  -dd drop
+#  -ds stats
+#  -dq query
+# -s snapshot (all, exif, md5, compare)
+#  -p path
+# -n rename (all, extension, filename)
+# -t tidy (duplicate, similar, non-multimedia, inconsistent dates, )
+
+require "pissaro/persistence"
+
+
+def database_command
+  case ARGV[1]
+  when "drop"
+    Persistence.new.close
+  when "columns"
+    puts Persistence.new.media_columns
+  when "records"
+    puts Persistence.new.record_count
+  end
+end
+
+def snapshot_command
+
+end
+
+case ARGV[0]
+when "database"
+  database_command()
+when "snapshot"
+  snapshot_command()
+when "rename"
+when "tidy"
+end
+
+exit
+
+
+require "pissaro/exif"
+exifToSQLite("spec/samples")
+exit
+
 require "irb"
 IRB.start(__FILE__)
