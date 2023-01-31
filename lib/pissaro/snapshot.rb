@@ -26,6 +26,7 @@ class Snapshot
   end
 
   def process_file(path)
+    puts "Processing file #{path}"
     persistence.insert_media(file_name: path, md5: md5(path), snapshot_id: snap_id)
   end
 

@@ -22,16 +22,18 @@ require "pissaro"
 require "pissaro/persistence"
 require "pissaro/snapshot"
 
+@persistence = Persistence.new
+
 def database_command
   case ARGV[1]
   when "drop"
-    Persistence.new.delete
+    @persistence.delete
   when "columns"
-    puts Persistence.new.media_columns
+    puts @persistence.media_columns
   when "records"
-    puts Persistence.new.record_count
+    puts @persistence.record_count
   when "set"
-    Persistence.new.set
+    @persistence.set
   end
 end
 
@@ -42,7 +44,7 @@ def snapshot_command
   when "all"
   when "exif"
   when "md5"
-    Snapshot.new.md5 ARGV[2]
+    Snapshot.new(@persistence).create ARGV[2]
   when "compare"
   end
 end
