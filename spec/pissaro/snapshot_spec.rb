@@ -49,6 +49,11 @@ RSpec.describe Snapshot do
         expect { subject }.to change { persistence.snapshot_count }.by(1)
       end
 
+      it "populates the finish date" do
+        snapshot = persistence.get_snapshot(subject)
+        expect(snapshot.finished_at).not_to be_nil
+      end
+
       it "creates a new media record" do
         expect { subject }.to change { persistence.media_count }.by(1)
         media = persistence.media_by_snapshot(subject)

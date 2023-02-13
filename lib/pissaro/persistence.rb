@@ -93,12 +93,25 @@ class Persistence
     db.last_insert_row_id
   end
 
+  def finish_snapshot(id)
+    db.execute("UPDATE #{SNAPSHOT_TABLE_NAME} SET finished_at = ?", [DateTime.now.to_s])
+  end
+
   def media_by_snapshot(snapshot_id)
     media_query("SELECT * FROM #{MEDIA_TABLE_NAME} where snapshot_id = ?", snapshot_id)
   end
 
   def media_all
     media_query("SELECT * FROM #{MEDIA_TABLE_NAME}")
+  end
+
+  def get_snapshot(id)
+    result = db.execute("SELECT * FROM #{SNAPSHOT_TABLE_NAME} where id = ?", id)
+    return nil if result.empty?
+    raise "More than one snapshot with id #{id}" unless result.one?
+
+    record = result.first
+    Snapshot.new(self, {id: record[0], created_at: record[1], finished_at: record[2]})
   end
 
   private
