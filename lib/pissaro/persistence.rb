@@ -74,7 +74,7 @@ class Persistence
     columns = data_columns.join(',')
     values = ('?' * media_data.values.count).chars.join(',')
     query = "INSERT INTO #{MEDIA_TABLE_NAME} (#{columns}) VALUES (#{values})"
-    db.execute(query, media_data.values)
+    db.execute(query, media_data.values.map(&:to_s))
   rescue Encoding::UndefinedConversionError
     puts "Encoding error inserting file #{media_data[:file_name]}"
   end

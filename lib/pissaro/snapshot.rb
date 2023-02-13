@@ -1,5 +1,6 @@
 require 'digest'
 require 'pissaro/persistence'
+require 'pissaro/exif'
 
 class Snapshot
   attr_reader :persistence, :snap_id
