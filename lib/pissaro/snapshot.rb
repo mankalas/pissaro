@@ -27,7 +27,9 @@ class Snapshot
 
   def process_file(path)
     puts "Processing file #{path}"
-    persistence.insert_media(file_name: path, md5: md5(path), snapshot_id: snap_id)
+    exif_hash = Exif.exif_to_hash(path)
+    media_data = { file_name: path, md5: md5(path), snapshot_id: snap_id }.merge(exif_hash)
+    persistence.insert_media(media_data)
   end
 
   def md5(path)
