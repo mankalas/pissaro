@@ -21,6 +21,16 @@ RSpec.describe Snapshot do
       it "raises an error" do
         expect { subject }.to raise_error "Path does not exist"
       end
+
+      it "doesn't create a snapshot" do
+        expect do
+          begin
+            subject
+          rescue Exception
+            nil
+          end
+        end.not_to change { persistence.snapshot_count }
+      end
     end
 
     describe "when path is a file" do
