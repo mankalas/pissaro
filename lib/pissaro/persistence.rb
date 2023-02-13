@@ -75,6 +75,8 @@ class Persistence
     values = ('?' * media_data.values.count).chars.join(',')
     query = "INSERT INTO #{MEDIA_TABLE_NAME} (#{columns}) VALUES (#{values})"
     db.execute(query, media_data.values)
+  rescue Encoding::UndefinedConversionError
+    puts "Encoding error inserting file #{media_data[:file_name]}"
   end
 
   def upsert_md5(file_name, md5, id)
