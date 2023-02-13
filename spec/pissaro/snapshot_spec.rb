@@ -12,6 +12,15 @@ RSpec.describe Snapshot do
     persistence.set
   end
 
+  describe "from_record" do
+    it "construct a valid snapshot" do
+      snapshot = Snapshot.new(nil, {id: 1, created_at: 2, finished_at: 3})
+      expect(snapshot.id).to eq 1
+      expect(snapshot.created_at).to eq 2
+      expect(snapshot.finished_at).to eq 3
+    end
+  end
+
   describe "create" do
     subject { snap.create(path) }
 
@@ -61,6 +70,13 @@ RSpec.describe Snapshot do
       it "creates as many new media record as there are files" do
         expect { subject }.to change { persistence.media_count }.by(2)
       end
+
+      describe "interruption" do
+
+        "MAke sure a snapshot has a finished date"
+        "Otherwise, it has been interrupted, and next snapshot should use the unfinished one, ignoring all files that were done during the unfinished snapshot"
+      end
+
     end
 
     describe "when there already is a previous snapshot" do
@@ -82,7 +98,7 @@ RSpec.describe Snapshot do
       end
 
       it "media records have a different snapshot id" do
-        snap.create(path)
+        subject
 
         media = persistence.media_all
         expect(media[0].snapshot_id).not_to eq(media[1].snapshot_id)
