@@ -24,6 +24,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.12.0)
     rspec-support (3.12.0)
+    ruby-filemagic (0.7.3)
     sqlite3 (1.6.0)
       mini_portile2 (~> 2.8.0)
 
@@ -37,6 +38,7 @@ DEPENDENCIES
   pissaro!
   rake (~> 10.0)
   rspec (~> 3.0)
+  ruby-filemagic
   sqlite3
 
 BUNDLED WITH
