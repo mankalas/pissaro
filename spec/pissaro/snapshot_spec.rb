@@ -63,6 +63,10 @@ RSpec.describe Snapshot do
         expect(medium.md5).not_to be_nil
         expect(medium.snapshot_id).to eq 1
       end
+
+      describe "when it's a file >2.5Gb" do
+        # TODO
+      end
     end
 
     describe "when path is a directory" do

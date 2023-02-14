@@ -42,7 +42,7 @@ class Snapshot
   end
 
   def md5(path)
-    Digest::MD5.hexdigest(File.read(path))
+    Digest::SHA256.file(path).hexdigest
   end
 
   def mime(path)
