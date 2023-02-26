@@ -17,6 +17,17 @@ RSpec.describe Persistence do
     db.execute("CREATE TABLE #{table_test}(#{sql_columns})")
   end
 
+  def insert_random_records(n)
+    n.times do
+      values = columns.map { random_string }.map { |c| "'#{c}'" }.join(",")
+      db.execute("INSERT INTO #{table_test} VALUES (#{values})")
+    end
+  end
+
+  def random_string(size = 32)
+    ('a'..'z').to_a.shuffle[0, size].join
+  end
+
   describe "delete" do
     subject { persistence.delete }
 
@@ -45,8 +56,7 @@ RSpec.describe Persistence do
     let(:nb_records) { 5 }
 
     before do
-      values = columns.map { |c| (65 + rand(26)).chr }.map { |c| "'#{c}'" }.join(",")
-      nb_records.times { db.execute("INSERT INTO #{table_test} VALUES (#{values})") }
+      insert_random_records(nb_records)
     end
 
     describe "when the table is empty" do
@@ -134,6 +144,52 @@ RSpec.describe Persistence do
           expect { subject }
             .to change { persistence.columns(table_test) }
                   .from(columns).to(media_columns)
+        end
+      end
+    end
+  end
+
+  describe "duplicates" do
+    let(:duplicates) { persistence.duplicates }
+
+    describe "when there's no duplicate" do
+      before do
+        insert_random_records(5)
+      end
+
+      it "is empty" do
+        expect(duplicates).to be_empty
+      end
+    end
+
+    describe "when there are duplicates" do
+      describe "across one md5" do
+        before do
+          5.times do
+            db.execute("INSERT INTO #{table_test} VALUES (?, ?, ?)", [random_string, 0, 'md5'])
+          end
+        end
+
+        it "returns the duplicates" do
+          expect(duplicates.count).to be 5
+          expect(duplicates.map(&:md5).uniq).to be_one
+        end
+      end
+
+      describe "across multiple md5" do
+        before do
+          5.times do
+            db.execute("INSERT INTO #{table_test} VALUES (?, ?, ?)", [random_string, 0, 'one'])
+            db.execute("INSERT INTO #{table_test} VALUES (?, ?, ?)", [random_string, 0, 'two'])
+          end
+        end
+
+        it "returns the duplicates as groups" do
+          expect(duplicates.count).to be 10
+
+          grouped_duplicates = duplicates.group_by(&:md5)
+          expect(grouped_duplicates.count).to equal 2
+          expect(grouped_duplicates.values.map(&:count).uniq.first).to equal 5
         end
       end
     end

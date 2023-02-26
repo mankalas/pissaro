@@ -114,13 +114,28 @@ class Persistence
     Snapshot.new(self, {id: record[0], created_at: record[1], finished_at: record[2]})
   end
 
+  def query(query, args = [])
+    db.execute(query, args)
+  end
+
+  def duplicates
+    db.execute("""
+        SELECT file_name, snapshot_id, md5 from #{MEDIA_TABLE_NAME} WHERE md5 in (
+          SELECT md5 from #{MEDIA_TABLE_NAME} GROUP BY md5 HAVING count(*) > 1
+        )
+    """).map { |r| record_to_medium(r) }
+  end
+
   private
 
   def media_query(query, *args)
-    result = db.execute(query, args)
-    result.map do |record|
-      Medium.new(file_name: record[1], snapshot_id: record[2], md5: record[3])
-    end
+    db
+      .execute(query, args)
+      .map { |r| record_to_medium(r, 1) }
+  end
+
+  def record_to_medium(record, i = 0)
+    Medium.new(file_name: record[i], snapshot_id: record[i + 1], md5: record[i + 2])
   end
 
   def update_media_schema(media_data)
