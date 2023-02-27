@@ -65,7 +65,30 @@ RSpec.describe Snapshot do
       end
 
       describe "when it's a file >2.5Gb" do
-        # TODO
+        let(:big_file) { "test.big" }
+
+        before do
+          system("dd if=/dev/random of=#{big_file} bs=1 count=0 seek=4196M")
+        end
+
+        it "works" do
+          expect { subject }.to change { persistence.media_count }.by(1)
+        end
+
+        after do
+          File.delete(big_file)
+        end
+      end
+
+      describe "when an error is raised processing the file" do
+        before do
+
+        end
+
+        it "doesn't have a fininshed date" do
+          snapshot = persistence.get_snapshot(subject)
+          expect(snapshot.finished_at).not be_nil
+        end
       end
     end
 
