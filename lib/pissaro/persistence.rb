@@ -93,12 +93,17 @@ class Persistence
     db.last_insert_row_id
   end
 
+  def get_or_create_snapshot
+    records = db.execute("SELECT * FROM #{SNAPSHOT_TABLE_NAME} WHERE finished_at IS NULL")
+    records.empty? ? create_snapshot : records.first[0]
+  end
+
   def finish_snapshot(id)
     db.execute("UPDATE #{SNAPSHOT_TABLE_NAME} SET finished_at = ?", [DateTime.now.to_s])
   end
 
   def media_by_snapshot(snapshot_id)
-    media_query("SELECT * FROM #{MEDIA_TABLE_NAME} where snapshot_id = ?", snapshot_id)
+    media_query("SELECT * FROM #{MEDIA_TABLE_NAME} WHERE snapshot_id = ?", snapshot_id)
   end
 
   def media_all
@@ -106,7 +111,8 @@ class Persistence
   end
 
   def get_snapshot(id)
-    result = db.execute("SELECT * FROM #{SNAPSHOT_TABLE_NAME} where id = ?", id)
+    puts id
+    result = db.execute("SELECT * FROM #{SNAPSHOT_TABLE_NAME} WHERE id = ?", id)
     return nil if result.empty?
     raise "More than one snapshot with id #{id}" unless result.one?
 

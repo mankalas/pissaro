@@ -87,7 +87,7 @@ RSpec.describe Snapshot do
 
         it "doesn't have a fininshed date" do
           snapshot = persistence.get_snapshot(subject)
-          expect(snapshot.finished_at).not be_nil
+          expect(snapshot.finished_at).not_to be_nil
         end
       end
     end
@@ -114,26 +114,45 @@ RSpec.describe Snapshot do
     describe "when there already is a previous snapshot" do
       let(:path) { "spec/samples/photo.jpg" }
 
-      before do
-        snap.create(path)
-        expect(persistence.media_count).to eq(1)
+      describe "when the snapshot is finished" do
+        before do
+          snap.create(path)
+          expect(persistence.media_count).to eq(1)
+        end
+
+        it "creates a new snapshot record" do
+          expect { subject }.to change { persistence.snapshot_count }.by(1)
+          expect(persistence.snapshot_count).to eq(2)
+        end
+
+        it "creates a new media record" do
+          expect { subject }.to change { persistence.media_count }.by(1)
+          expect(persistence.media_count).to eq(2)
+        end
+
+        it "media records have a different snapshot id" do
+          subject
+
+          media = persistence.media_all
+          expect(media[0].snapshot_id).not_to eq(media[1].snapshot_id)
+        end
       end
 
-      it "creates a new snapshot record" do
-        expect { subject }.to change { persistence.snapshot_count }.by(1)
-        expect(persistence.snapshot_count).to eq(2)
-      end
+      describe "when the snapshot was interrupted" do
+        before do
+          old = snap.create(path)
+          persistence.query("UPDATE snapshots SET finished_at = NULL WHERE id = ?", old)
+        end
 
-      it "creates a new media record" do
-        expect { subject }.to change { persistence.media_count }.by(1)
-        expect(persistence.media_count).to eq(2)
-      end
+        it "continues the interrupted snapshot" do
+          expect { subject }.not_to change { persistence.snapshot_count }
+          snapshot = persistence.get_snapshot(subject)
+          expect(snapshot.finished_at).not_to be_nil
+        end
 
-      it "media records have a different snapshot id" do
-        subject
-
-        media = persistence.media_all
-        expect(media[0].snapshot_id).not_to eq(media[1].snapshot_id)
+        it "doesn't process files already in the snapshot" do
+          fail()
+        end
       end
     end
   end

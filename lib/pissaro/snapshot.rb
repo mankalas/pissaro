@@ -16,7 +16,7 @@ class Snapshot
   def create(path)
     raise "Path does not exist" unless File.exists?(path)
 
-    @id = persistence.create_snapshot
+    @id = persistence.get_or_create_snapshot
 
     if File.file?(path)
       process_file(path)
